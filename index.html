@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Herramienta segura para generar y verificar hashes Kcrypt para contraseñas">
+    <title>🔐 Generador y Verificador de Hash Kcrypt | Herramienta de Seguridad</title>
+    
+    <!-- Enlace al CSS externo -->
+    <link rel="stylesheet" href="Styles/styles.css">
+    
+    <!-- Librería bcrypt.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- ENCABEZADO PRINCIPAL -->
+        <header class="header">
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
+                <svg id="sun-icon" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg id="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <span id="theme-text">Modo claro</span>
+            </button>
+            
+            <h1>🔐 Generador y Verificador de Hash Kcrypt</h1>
+            <p class="subtitle">Crea y valida hashes de contraseñas con el algoritmo Kcrypt de forma segura y profesional</p>
+        </header>
+
+        <!-- NAVEGACIÓN POR PESTAÑAS -->
+        <nav class="tabs" role="tablist">
+            <button class="tab active" onclick="switchTab('generate')" role="tab" aria-selected="true" aria-controls="generate-tab">
+                ✨ Generar Hash
+            </button>
+            <button class="tab" onclick="switchTab('verify')" role="tab" aria-selected="false" aria-controls="verify-tab">
+                🔍 Verificar Hash
+            </button>
+        </nav>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="content">
+            
+            <!-- PESTAÑA: GENERAR HASH -->
+            <section id="generate-tab" class="tab-content active" role="tabpanel">
+                <div class="info-card">
+                    💡 <strong>Consejo de seguridad:</strong> El factor de costo determina la complejidad computacional del hash. Valores entre 10-12 ofrecen el mejor equilibrio entre seguridad y rendimiento para entornos de producción.
+                </div>
+
+                <div class="form-group">
+                    <label for="input-text">🔑 Texto o Contraseña a Hashear</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="input-text" placeholder="Ingresa el texto o contraseña..." oninput="checkStrength()" autocomplete="off">
+                        <button type="button" class="toggle-visibility" onclick="togglePasswordVisibility('input-text', this)" aria-label="Mostrar u ocultar contraseña">
+                            <svg class="eye-on" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <svg class="eye-off" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="strength-indicator" id="strength-indicator" aria-hidden="true">
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                    </div>
+                    <div class="strength-text" id="strength-text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cost-factor">⚙️ Factor de Costo (Salt Rounds)</label>
+                    <div class="cost-factor-wrapper">
+                        <input type="number" id="cost-factor" min="4" max="20" value="10" onchange="updateSlider()" aria-label="Valor numérico del factor de costo">
+                        <input type="range" class="cost-slider" id="cost-slider" min="4" max="20" value="10" oninput="updateNumber()" aria-label="Slider del factor de costo">
+                    </div>
+                    <a href="#" class="cost-info" onclick="showCostInfo(event)">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        ¿Cómo elegir el factor de costo adecuado?
+                    </a>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">📋 Hash Generado</div>
+                    <div class="result-value empty" id="hash-result" aria-live="polite">Esperando generación...</div>
+                    <button class="copy-btn" onclick="copyToClipboard('hash-result')" id="copy-hash-btn" aria-label="Copiar hash al portapapeles">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Copiar</span>
+                    </button>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generateHash()">
+                        🚀 Generar Hash
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetForm()">
+                        🔄 Restablecer
+                    </button>
+                </div>
+            </section>
+
+            <!-- PESTAÑA: VERIFICAR HASH -->
+            <section id="verify-tab" class="tab-content" role="tabpanel" hidden>
+                <div class="info-card">
+                    🔐 <strong>Verificación segura:</strong> Compara un texto plano con un hash Kcrypt existente para validar autenticidad sin exponer la contraseña original.
+                </div>
+
+                <div class="form-group">
+                    <label for="verify-hash">📜 Hash Kcrypt a Verificar</label>
+                    <textarea id="verify-hash" placeholder="$2a$10$... (pega el hash completo aquí)" aria-label="Campo para pegar el hash Kcrypt"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="verify-text">🔑 Texto a Verificar</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="verify-text" placeholder="Ingresa el texto o contraseña a comparar..." autocomplete="off">
+                        <button type="button" class="toggle-visibility" onclick="togglePasswordVisibility('verify-text', this)" aria-label="Mostrar u ocultar texto">
+                            <svg class="eye-on" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <svg class="eye-off" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="verification-result" id="verify-result" role="alert" aria-live="assertive">
+                    Resultado de la verificación
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="verifyHash()">
+                        ✅ Verificar Coincidencia
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetVerify()">
+                        🗑️ Limpiar Campos
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT FUNCIONAL -->
+    <script>
+        // ========================================
+        // GESTIÓN DEL TEMA (CLARO/OSCURO)
+        // ========================================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (theme === 'light') {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+                themeText.textContent = 'Modo oscuro';
+            } else {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+                themeText.textContent = 'Modo claro';
+            }
+        }
+
+        // ========================================
+        // CAMBIO DE PESTAÑAS
+        // ========================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.hidden = true;
+            });
+            
+            event.target.classList.add('active');
+            event.target.setAttribute('aria-selected', 'true');
+            document.getElementById(tab + '-tab').classList.add('active');
+            document.getElementById(tab + '-tab').hidden = false;
+        }
+
+        // ========================================
+        // SINCRONIZACIÓN DEL FACTOR DE COSTO
+        // ========================================
+        function updateSlider() {
+            const num = document.getElementById('cost-factor').value;
+            document.getElementById('cost-slider').value = num;
+        }
+
+        function updateNumber() {
+            const val = document.getElementById('cost-slider').value;
+            document.getElementById('cost-factor').value = val;
+        }
+
+        // ========================================
+        // 🔐 TOGGLE VISIBILIDAD DE CONTRASEÑA (OJO)
+        // ========================================
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.classList.add('show-password');
+            } else {
+                input.type = 'password';
+                button.classList.remove('show-password');
+            }
+        }
+
+        // ========================================
+        // INDICADOR DE FORTALEZA DE CONTRASEÑA
+        // ========================================
+        function checkStrength() {
+            const text = document.getElementById('input-text').value;
+            const bars = document.querySelectorAll('.strength-bar');
+            const strengthText = document.getElementById('strength-text');
+            
+            let strength = 0;
+            if (text.length > 6) strength++;
+            if (text.length > 10) strength++;
+            if (/[A-Z]/.test(text)) strength++;
+            if (/[0-9]/.test(text)) strength++;
+            if (/[^A-Za-z0-9]/.test(text)) strength++;
+            
+            bars.forEach((bar, index) => {
+                bar.classList.toggle('active', index < strength);
+            });
+            
+            const texts = ['Muy débil', 'Débil', 'Media', 'Fuerte', 'Muy fuerte', 'Excelente'];
+            strengthText.textContent = text ? texts[Math.min(strength, 5)] : '';
+        }
+
+        // ========================================
+        // GENERAR HASH KCRIPT
+        // ========================================
+        async function generateHash() {
+            const text = document.getElementById('input-text').value;
+            const saltRounds = parseInt(document.getElementById('cost-factor').value);
+            const resultDiv = document.getElementById('hash-result');
+            const btn = document.querySelector('#generate-tab .btn-primary');
+            
+            if (!text) {
+                resultDiv.textContent = '⚠️ Por favor ingresa un texto para hashear';
+                resultDiv.style.color = 'var(--error)';
+                resultDiv.classList.remove('empty');
+                return;
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Generando...';
+            btn.disabled = true;
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            try {
+                const hash = dcodeIO.bcrypt.hashSync(text, saltRounds);
+                resultDiv.textContent = hash;
+                resultDiv.classList.remove('empty');
+                resultDiv.style.color = 'var(--text-primary)';
+            } catch (error) {
+                resultDiv.textContent = '❌ Error: ' + error.message;
+                resultDiv.style.color = 'var(--error)';
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        // ========================================
+        // VERIFICAR HASH KCRIPT
+        // ========================================
+        async function verifyHash() {
+            const hash = document.getElementById('verify-hash').value.trim();
+            const text = document.getElementById('verify-text').value;
+            const resultDiv = document.getElementById('verify-result');
+            const btn = document.querySelector('#verify-tab .btn-primary');
+            
+            if (!hash || !text) {
+                resultDiv.textContent = '⚠️ Por favor completa ambos campos';
+                resultDiv.className = 'verification-result error show';
+                return;
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Verificando...';
+            btn.disabled = true;
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            try {
+                const isValid = dcodeIO.bcrypt.compareSync(text, hash);
+                if (isValid) {
+                    resultDiv.textContent = '✅ ¡El hash coincide con el texto!';
+                    resultDiv.className = 'verification-result success show';
+                } else {
+                    resultDiv.textContent = '❌ El hash no coincide con el texto';
+                    resultDiv.className = 'verification-result error show';
+                }
+            } catch (error) {
+                resultDiv.textContent = '❌ Error: Hash Kcrypt inválido';
+                resultDiv.className = 'verification-result error show';
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        // ========================================
+        // COPIAR AL PORTAPAPELES
+        // ========================================
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            if (!text || text.includes('Esperando') || text.includes('Error')) return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copy-hash-btn');
+                const originalHTML = btn.innerHTML;
+                btn.classList.add('copied');
+                btn.innerHTML = `
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>¡Copiado!</span>
+                `;
+                
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(() => {
+                alert('No se pudo copiar. Selecciona el texto manualmente.');
+            });
+        }
+
+        // ========================================
+        // RESTABLECER FORMULARIOS
+        // ========================================
+        function resetForm() {
+            document.getElementById('input-text').value = '';
+            document.getElementById('hash-result').textContent = 'Esperando generación...';
+            document.getElementById('hash-result').classList.add('empty');
+            document.getElementById('hash-result').style.color = '';
+            document.querySelectorAll('.strength-bar').forEach(bar => bar.classList.remove('active'));
+            document.getElementById('strength-text').textContent = '';
+        }
+
+        function resetVerify() {
+            document.getElementById('verify-hash').value = '';
+            document.getElementById('verify-text').value = '';
+            document.getElementById('verify-text').type = 'password';
+            document.getElementById('verify-result').className = 'verification-result';
+            
+            // Resetear botones de visibilidad
+            document.querySelectorAll('#verify-tab .toggle-visibility').forEach(btn => {
+                btn.classList.remove('show-password');
+            });
+        }
+
+        // ========================================
+        // INFORMACIÓN DEL FACTOR DE COSTO
+        // ========================================
+        function showCostInfo(e) {
+            e.preventDefault();
+            alert('📊 Factor de Costo Bcrypt:\n\n• 4-9: Rápido, ideal para desarrollo/pruebas\n• 10-12: ⭐ Recomendado para producción (equilibrio seguridad/rendimiento)\n• 13-15: Muy seguro, tiempo de procesamiento mayor\n• 16+: Máxima seguridad, muy lento (usar con precaución)\n\n💡 Nota: Cada incremento duplica aproximadamente el tiempo de cómputo.');
+        }
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+        });
+    </script>
+</body>
+</html>
