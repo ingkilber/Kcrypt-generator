@@ -13,7 +13,7 @@ Una aplicación web moderna, elegante y totalmente funcional para generar y veri
 - 📋 Copiar al Portapapeles: Un clic para copiar hashes generados
 - 📱 Responsive: Funciona perfectamente en desktop, tablet y móvil
 
-## ⚡ 100% Cliente: Sin necesidad de servidor backend, todo funciona en el navegador
+- ⚡ 100% Cliente: Sin necesidad de servidor backend, todo funciona en el navegador
 
 ## 🛠️ Tecnologías
 - HTML5 semántico
